@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>myMemoPad</title>
+<script src="js/jquery-2.1.3.min.js"></script>
+<link rel="stylesheet" href="css/sample.css">
+</head>
+<body>
+<header>
+<h1>MemoPad</h1>
+
+</header>
+<main>
+  <div class="setsumei">
+    <ul class="setsumei-list">
+      <li>メモ追加ボタンをクリックしてメモを新規作成</li>
+      <li>メモをクリックして編集</li>
+      <li>メモをダブルクリックで削除</li>
+    </ul>
+  </div>
+    <div id="memo-area">
+        <button class="add-memo" type="button">メモ追加</P></button>
+    </div>
+</main>
+
+<script>
+const memoContainer = document.getElementById("memo-area");
+const addMemoButton = memoContainer.querySelector(".add-memo");
+
+
+getMemo().forEach((memo) => {
+  const memoElement = createMemoElement(memo.id, memo.content);
+  memoContainer.insertBefore(memoElement, addMemoButton.nextSibling);
+
+});
+
+addMemoButton.addEventListener("click", () => addMemo());
+
+function getMemo() {
+  return JSON.parse(localStorage.getItem("memo-list") || "[]");
+}
+
+function saveMemo(memos) {
+  localStorage.setItem("memo-list", JSON.stringify(memos));
+}
+
+function createMemoElement(id, content) {
+  const element = document.createElement("textarea");
+
+  element.classList.add("memo");
+  element.value = content;
+  element.placeholder = "ここに入力";
+
+  element.addEventListener("change", () => {
+    updateMemo(id, element.value);
+  });
+
+  element.addEventListener("dblclick", () => {
+    const doDelete = confirm(
+      "本当に削除してOK？"
+    );
+
+    if (doDelete) {
+      deleteMemo(id, element);
+    }
+  });
+
+  return element;
+}
+
+function addMemo() {
+  const memos = getMemo();
+  const memoObject = {
+    id: Math.floor(Math.random() * 100000),
+    content: ""
+  };
+
+  const memoElement = createMemoElement(memoObject.id, memoObject.content);
+    memoContainer.insertBefore(memoElement, addMemoButton.nextSibling);
+    // $("memoContainer").insertBefore(memoElement, addMemoButton);
+
+  memos.push(memoObject);
+  saveMemo(memos);
+}
+
+function updateMemo(id, newContent) {
+  const memos = getMemo();
+  const targetMemo = memos.filter((memo) => memo.id == id)[0];
+
+  targetMemo.content = newContent;
+  saveMemo(memos);
+}
+
+function deleteMemo(id, element) {
+  const memos = getMemo().filter((memo) => memo.id != id);
+
+  saveMemo(memos);
+  memoContainer.removeChild(element);
+}
+
+
+
+
+</script>
+<footer><small></small></footer>
+</body>
+</html>
